@@ -7,7 +7,7 @@ const Mytasks = () => {
     const [tasks, setTasks] = useState([])
 
     useEffect(() => {
-        fetch(`http://localhost:5000/tasks?email=${user?.email}`)
+        fetch(`https://taskmanager-project-server.vercel.app/tasks?email=${user?.email}`)
             .then(res => res.json())
             .then(data => setTasks(data))
     }, [user?.email])
@@ -15,7 +15,7 @@ const Mytasks = () => {
     const handleTaskDelete = id => {
         const proceed = window.confirm('Want to Delete Your Task?');
         if (proceed) {
-            fetch(`http://localhost:5000/tasks/${id}`, {
+            fetch(`https://taskmanager-project-server.vercel.app/tasks/${id}`, {
                 method: 'DELETE'
             })
                 .then(res => res.json())
@@ -29,6 +29,28 @@ const Mytasks = () => {
                 })
         }
 
+
+    }
+    const updateTask = id => {
+        fetch(`https://taskmanager-project-server.vercel.app/tasks/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({ taskDescription: '' })
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                if (data.modifiedCount > 0) {
+                    const remaining = tasks.filter(odr => odr._id !== id);
+                    const approving = tasks.find(odr => odr._id === id);
+                    approving.taskDescription = 'Approved'
+
+                    const newTask = [approving, ...remaining];
+                    setTasks(newTask);
+                }
+            })
     }
     return (
         <div className='m-6 p-6'>
@@ -87,7 +109,8 @@ const Mytasks = () => {
                                 task={task}
 
                                 handleTaskDelete={handleTaskDelete}
-                            // updateReview={updateReview}
+
+                                updateTask={updateTask}
                             // handleInputChange={handleInputChange}
                             ></Tasksrow>)
 
